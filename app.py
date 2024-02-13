@@ -111,18 +111,21 @@ def quiz():
             question = raw[row]["question"]
             id = raw[row]["id"]
             image = raw[row]["image"]
-            ques += 1
             if randint(0, 1) == 0:
+                ques += 1
                 return render_template("quiz.html", question=question, image=image, id=id, button="n")
             else:
                 raw = db.execute("SELECT answer, wrong FROM questions WHERE id = ?", id)
                 right = raw[0]["answer"].title()
                 wrong, wrong1 = str(raw[0]["wrong"]).split(", ")
                 if randint(0, 2) == 0:
+                    ques += 1
                     return render_template("button.html", question=question, image=image, id=id, answer1=right, answer2=wrong1.title(), answer3=wrong.title(), button="y")
                 elif randint(0, 2) == 1:
+                    ques += 1
                     return render_template("button.html", question=question, image=image, id=id, answer1=wrong.title(), answer2=right, answer3=wrong1.title(), button="y")
                 else:
+                    ques += 1
                     return render_template("button.html", question=question, image=image, id=id, answer1=wrong1.title(), answer2=wrong.title(), answer3=right, button="y")
         else:
             total = 0

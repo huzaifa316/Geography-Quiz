@@ -52,7 +52,7 @@ def login():
         username = request.form.get('username').lower()
         raw = db.execute("SELECT id, username, hash FROM users WHERE(username = ?)", username)
 
-        if len(raw) != 1 or check_password_hash(raw[0]["hash"], request.form.get("password")):
+        if len(raw) == 1 and check_password_hash(raw[0]["hash"], request.form.get("password")):
             session["user_id"] = int(raw[0]["id"])
             return redirect("/")
         else:

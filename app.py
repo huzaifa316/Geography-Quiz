@@ -64,15 +64,16 @@ def register():
     if request.method == "GET":
         return render_template("register.html")
     else:
-        username = request.form.get("username").lower()
+        username = request.form.get("username")
         if not username or not request.form.get("password") or not request.form.get("confirmation"):
             return apology("Invalid Username or Password", 400)
         elif request.form.get("password") != request.form.get("confirmation"):
             return apology("Passwords do not match", 400)
 
+        username = request.form.get("username").lower()
         raw = db.execute("SELECT username FROM users WHERE username = ?", username)
 
-        if len(raw) > 1:
+        if len(raw) > 0:
             return apology("Username already exists", 400)
 
         db.execute("INSERT INTO users (username, hash) VALUES(?, ?)", username,

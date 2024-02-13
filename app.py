@@ -92,7 +92,7 @@ def logout():
     return redirect("/login")
 
 
-ques = 1
+ques = 0
 user = {}
 level = 0
 num = 0

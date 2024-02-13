@@ -154,7 +154,7 @@ def quiz():
             user.clear()
             level = 0
             ques = 0
-            return render_template("final.html", body=html, percent=int(round(((total)/num) * 100)))
+            return render_template("final.html", body=html, percent=int(round(((total)/(num + 1)) * 100)))
     else:
         id = request.form.get("id")
 

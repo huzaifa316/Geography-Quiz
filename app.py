@@ -287,7 +287,7 @@ def no():
             return redirect("/quiz")
         
         num = int(request.form.get("no")) - 1
-        elif num < 1:
+        if num < 1:
             num = 10
         return redirect("/quiz")
 

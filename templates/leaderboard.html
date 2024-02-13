@@ -1,0 +1,34 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Leaderboard
+{% endblock %}
+
+{% block main %}
+<table>
+    <thead>
+      <tr>
+        <th>Position</th>
+        <th>Name</th>
+        <th>Questions Answered</th>
+        <th>Highest Level</th>
+        <th>Questions Correct</th>
+      </tr>
+    </thead>
+    <tbody>
+        {% for name in leaderboard %}
+          <tr>
+            <td>{{name.position}}</td>
+            <td>{{name.name}}</td>
+            <td>{{name.questions}}</td>
+            <td>{{name.level}}</td>
+            <td>{{name.correct}}</td>
+          </tr>
+        {% endfor %}
+    </tbody>
+  </table>
+  <br></br>
+  <h1>1st Position: {{one}}</h1>
+  <br></br>
+  <h1>{{urname}}: {{yours}}</h1>
+{% endblock %}

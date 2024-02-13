@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    finished
+{% endblock %}
+
+{% block main %}
+    <h1>Results: {% if percent > 50 %}<span class="green">{{percent}}%</span>{% else %}<span class="red">{{percent}}%</span>{% endif %}</h1>
+    <img src= "{{image}}">
+    <br></br>
+    {{body|safe}}
+
+
+
+{% endblock %}

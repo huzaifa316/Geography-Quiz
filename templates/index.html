@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Your Stats
+{% endblock %}
+
+{% block main %}
+    <h1>Your Stats</h1>
+    <br></br>
+    <h2>Questions Answered: {{questions}}</h2>
+    <br></br>
+    <h2><span class="green">Questions Correct: {{correct}}</span></h2>
+    <br></br>
+    <h2><span class="red">Questions Incorrect: {{questions - correct}}</span></h2>
+    <br></br>
+    {% if level > 5 %}
+        <h2>Highest Level: <span class="green">{{level}}</span</h2>
+    {% else %}
+        <h2>Highest Level: <span class="red">{{level}}</span</h2>
+    {% endif %}
+
+{% endblock %}

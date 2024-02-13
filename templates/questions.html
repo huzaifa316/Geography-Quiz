@@ -1,0 +1,26 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Questions
+{% endblock %}
+
+{% block main %}
+<table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Question</th>
+        <th>Level</th>
+      </tr>
+    </thead>
+    <tbody>
+        {% for question in questions %}
+          <tr>
+            <td>{{question.id}}</td>
+            <td>{{question.question}}</td>
+            <td>{{question.level}}</td>
+          </tr>
+        {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

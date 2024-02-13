@@ -1,0 +1,37 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Approve
+{% endblock %}
+
+{% block main %}
+<table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Question</th>
+        <th>Level</th>
+        <th>Approve</th>
+      </tr>
+    </thead>
+    <tbody>
+        {% for question in questions %}
+          <tr>
+            <td>{{question.id}}</td>
+            <td>{{question.question}}</td>
+            <td>{{question.level}}</td>
+            <td>
+                <form action="/approve" method="post">
+                    <input type="hidden" name="id" value="{{question.id}}">
+                    <button class="btn btn-primary" type="submit" value="{{question.id}}">Approve</button>
+                </form>
+            </td>
+          </tr>
+        {% endfor %}
+    </tbody>
+  </table>
+  <form action="/approve" method="post">
+    <input type="hidden" name="id" value="deny">
+    <button class="btn btn-primary" type="submit" value="deny">Deny All</button>
+</form>
+{% endblock %}

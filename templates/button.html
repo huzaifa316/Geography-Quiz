@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Questions
+{% endblock %}
+
+{% block main %}
+    <style>
+        img {
+        width: 50%; /* Scale down by a factor of 2 */
+        height: auto; /* Maintain aspect ratio */
+        }
+    </style>
+
+    <h1>Question: {{question}}</h1>
+    <img src= "{{image}}">
+    <br></br>
+    <form action="/quiz" method="post">
+        <input type="hidden" name="id" value="{{id}}">
+        <input type="hidden" name="button" value="{{button}}">
+        <button class="btn btn-primary btn-lg" type="submit" name="submit_button" value="{{answer1}}">{{answer1}}</button>
+        <button class="btn btn-primary btn-lg" type="submit" name="submit_button" value="{{answer2}}">{{answer2}}</button>
+        <button class="btn btn-primary btn-lg" type="submit" name="submit_button" value="{{answer3}}">{{answer3}}</button>
+    </form>
+
+
+{% endblock %}

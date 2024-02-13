@@ -105,7 +105,7 @@ def quiz():
         global level
         global num
         global id
-        if ques < num:
+        if ques <= num:
             raw = db.execute("SELECT question, id, image FROM questions WHERE level = ? AND id != ?", level + 1, id)
             row = randint(0, (len(raw) - 1))
             question = raw[row]["question"]

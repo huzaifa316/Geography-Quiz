@@ -93,46 +93,43 @@ def logout():
     return redirect("/login")
 
 
-ques = 0
-user = {}
-level = 0
-num = 0
+session["ques"] = 0
+session["user"] = {}
+session["level"] = 0
+session["num"] = 0
 id = 0
 @app.route("/quiz", methods=['GET', 'POST'])
 @login_required
 def quiz():
     if request.method == "GET":
-        global ques
-        global level
-        global num
         global id
-        if ques <= num:
-            raw = db.execute("SELECT question, id, image FROM questions WHERE level = ? AND id != ?", level + 1, id)
+        if session["ques"] <= session["num"]:
+            raw = db.execute("SELECT question, id, image FROM questions WHERE level = ? AND id != ?", session["level"] + 1, id)
             row = randint(0, (len(raw) - 1))
             question = raw[row]["question"]
             id = raw[row]["id"]
             image = raw[row]["image"]
             if randint(0, 1) == 0:
-                ques += 1
+                session["ques"] += 1
                 return render_template("quiz.html", question=question, image=image, id=id, button="n")
             else:
                 raw = db.execute("SELECT answer, wrong FROM questions WHERE id = ?", id)
                 right = raw[0]["answer"].title()
                 wrong, wrong1 = str(raw[0]["wrong"]).split(", ")
                 if randint(0, 2) == 0:
-                    ques += 1
+                    session["ques"] += 1
                     return render_template("button.html", question=question, image=image, id=id, answer1=right, answer2=wrong1.title(), answer3=wrong.title(), button="y")
                 elif randint(0, 2) == 1:
-                    ques += 1
+                    session["ques"] += 1
                     return render_template("button.html", question=question, image=image, id=id, answer1=wrong.title(), answer2=right, answer3=wrong1.title(), button="y")
                 else:
-                    ques += 1
+                    session["ques"] += 1
                     return render_template("button.html", question=question, image=image, id=id, answer1=wrong1.title(), answer2=wrong.title(), answer3=right, button="y")
         else:
             total = 0
             html = ''
-            for key in user.keys():
-                if user[key] == 'y':
+            for key in session["user"].keys():
+                if session["user"][key] == 'y':
                     raw = db.execute("SELECT question, level FROM questions WHERE id = ?", key)
                     html += '<h3>' + raw[0]['question'] + ' : <span class="green">Correct!</span></h3><br></br>'
                     db.execute("UPDATE users SET questions = questions + 1 WHERE id = ?", session["user_id"])
@@ -144,17 +141,17 @@ def quiz():
                         raw[0]['question'] + ' : <span class="red">Incorrect!</span><br></br> <span class="green">Correct: </span>' + \
                         raw[0]["answer"] + '</h3><br></br>'
                     raw = db.execute("SELECT level FROM users WHERE id = ?", session["user_id"])
-                    if level > int(raw[0]["level"]):
-                        level = level
+                    if session["level"] > int(raw[0]["level"]):
+                        session["level"] = session["level"]
                     else:
-                        level = int(raw[0]["level"])
+                        session["level"] = int(raw[0]["level"])
 
-                    db.execute("UPDATE users SET questions = questions + 1, level = ? WHERE id = ?", level, session["user_id"])
+                    db.execute("UPDATE users SET questions = questions + 1, level = ? WHERE id = ?", session["level"], session["user_id"])
 
-            user.clear()
-            level = 0
-            ques = 0
-            return render_template("final.html", body=html, percent=int(round(((total)/(num + 1)) * 100)))
+            session["user"].clear()
+            session["level"] = 0
+            session["ques"] = 0
+            return render_template("final.html", body=html, percent=int(round(((total)/(session["num"] + 1)) * 100)))
     else:
         id = request.form.get("id")
 
@@ -168,14 +165,14 @@ def quiz():
             return apology("error", 400)
 
         if str(raw[0]["answer"]).lower().strip() == answer.lower().strip():
-            user[id] = 'y'
-            if level < 8:
-                level += 1
+            session["user"][id] = 'y'
+            if session["level"] < 8:
+                session["level"] += 1
             return redirect("/quiz")
         else:
-            user[id] = 'n'
-            if level > 1:
-                level -= 1
+            session["user"][id] = 'n'
+            if session["level"] > 1:
+                session["level"] -= 1
             return redirect("/quiz")
 
 
@@ -279,19 +276,18 @@ def no():
     if request.method == "GET":
         return render_template("no.html")
     else:
-        global num
         if not request.form.get("no"):
-            num = 9
+            session["num"] = 9
             return redirect("/quiz")
         
         try:
             int(request.form.get("no"))
         except ValueError:
-            num = 9
+            session["num"] = 9
             return redirect("/quiz")
         
-        num = int(request.form.get("no")) - 1
-        if num < 1:
-            num = 9
+        session["num"] = int(request.form.get("no")) - 1
+        if session["num"] < 1:
+            session["num"] = 9
         return redirect("/quiz")
 

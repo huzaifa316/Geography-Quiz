@@ -279,7 +279,13 @@ def no():
         if not request.form.get("no"):
             num = 10
             return redirect("/quiz")
-            
+        
+        try:
+            int(request.form.get("no"))
+        except ValueError:
+            num = 10
+            return redirect("/quiz")
+        
         num = int(request.form.get("no")) - 1
         elif num < 1:
             num = 10

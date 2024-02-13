@@ -276,8 +276,12 @@ def no():
         return render_template("no.html")
     else:
         global num
+        if not request.form.get("no"):
+            num = 10
+            return redirect("/quiz")
+            
         num = int(request.form.get("no")) - 1
-        if num < 1:
+        elif num < 1:
             num = 10
         return redirect("/quiz")
 

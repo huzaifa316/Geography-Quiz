@@ -45,6 +45,9 @@ To run the Geography Quiz 🌍 application locally, follow these steps:
 - Explore the quiz features, take quizzes, view leaderboards, and manage questions as per your role.
 - Log out when you're done to securely end your session.
 
+- The default admin username and password is Username: Admin and Password: Admin
+- Please change them by running `SQL("sqlite:///geog.db").execute("UPDATE users SET username = username, hash = ? WHERE id = 1", generate_password_hash("password"))` where username and password are the new values
+
 ## Contributing
 
 Contributions to the Geography Quiz 🌍 application are welcome! If you find any bugs, have suggestions for improvements, or would like to contribute new features, please open an issue or submit a pull request.

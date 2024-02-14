@@ -285,9 +285,9 @@ def approve():
         if request.form.get("id") == "deny":
             db.execute("DELETE FROM review")
         else:
+             raw = db.execute("SELECT * FROM review WHERE id = ?", int(request.form.get("id")))
              if len(raw) < 1:
                  return apology("Invalid response", 400)
-             raw = db.execute("SELECT * FROM review WHERE id = ?", int(request.form.get("id")))
              db.execute("INSERT INTO questions (question, answer, wrong, level, image) VALUES(?, ?, ?, ?, ?)", raw[0]["question"], raw[0]["answer"], raw[0]["wrong"], int(raw[0]["level"]), generate_image(raw[0]["word"]))
              db.execute("DELETE FROM review WHERE id = ?", int(request.form.get("id")))
 

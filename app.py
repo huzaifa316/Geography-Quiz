@@ -23,10 +23,6 @@ db = SQL("sqlite:///geog.db")
 
 @app.after_request
 def after_request(response):
-    """Ensure responses aren't cached"""
-    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-    response.headers["Expires"] = 0
-    response.headers["Pragma"] = "no-cache"
     return response
 
 
@@ -58,7 +54,7 @@ def login():
 
             #initialise quiz variables
             session["ques"] = 0
-            session["user"] = {}
+            session["user"] = []
             session["level"] = 0
             session["num"] = 0
             return redirect("/")
@@ -147,15 +143,16 @@ def quiz():
             #executes when quiz is finished
             total = 0
             html = ''
-            for key in session["user"].keys():
+            for ans in session["user"]:
                 #inserts html directly into jinja template
-                if session["user"][key] == 'y':
+                key = list(ans.keys())[0]
+                if ans[key] == 'y':
                     raw = db.execute("SELECT question, level FROM questions WHERE id = ?", key)
                     html += '<h3>' + raw[0]['question'] + ' : <span class="green">Correct!</span></h3><br></br>'
                     db.execute("UPDATE users SET questions = questions + 1 WHERE id = ?", session["user_id"])
                     db.execute("UPDATE users SET correct = correct + 1 WHERE id = ?", session["user_id"])
                     total += 1
-                else:
+                elif ans[key] == 'n':
                     raw = db.execute("SELECT question, level, answer FROM questions WHERE id = ?", key)
                     html += '<h3>' + \
                         raw[0]['question'] + ' : <span class="red">Incorrect!</span><br></br> <span class="green">Correct: </span>' + \
@@ -168,7 +165,7 @@ def quiz():
                     #adds values to the database
                     db.execute("UPDATE users SET questions = questions + 1, level = ? WHERE id = ?", session["level"], session["user_id"])
 
-            session["user"].clear()
+            session["user"] = []
             session["level"] = 0
             session["ques"] = 0
             return render_template("final.html", body=html, percent=int(round(((total)/(session["num"] + 1)) * 100)))
@@ -184,17 +181,21 @@ def quiz():
         raw = db.execute("SELECT answer FROM questions WHERE id = ?", id)
         if len(raw) > 1:
             return apology("error", 400)
-
+        
+        check = {}
         if str(raw[0]["answer"]).lower().strip() == answer.lower().strip():
-            session["user"][id] = 'y'
-            if session["level"] < 8:
+            check[id] = 'y'
+            if session["level"] < 9:
                 session["level"] += 1
-            return redirect("/quiz")
-        else:
-            session["user"][id] = 'n'
-            if session["level"] > 1:
-                session["level"] -= 1
-            return redirect("/quiz")
+            session["user"].append(check)
+        if str(raw[0]["answer"]).lower().strip() != answer.lower().strip():
+            check[id] = 'n'
+            session["level"] = session["level"] - 1
+            if session["level"] < 1:
+                session["level"] = 1
+            session["user"].append(check)
+
+        return redirect("/quiz")
 
 
 
@@ -315,3 +316,4 @@ def no():
             session["num"] = 9
         return redirect("/quiz")
 
+app.run(host='0.0.0.0', port=5000)

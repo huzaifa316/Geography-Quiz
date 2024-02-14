@@ -48,12 +48,19 @@ def login():
             return apology("Invalid username", 403)
         elif not request.form.get("password"):
             return apology("Invalid Password", 403)
-
+        #ensures username is lowered as that is how the usernames are stored
         username = request.form.get('username').lower()
         raw = db.execute("SELECT id, username, hash FROM users WHERE(username = ?)", username)
 
         if len(raw) == 1 and check_password_hash(raw[0]["hash"], request.form.get("password")):
+            #set user id
             session["user_id"] = int(raw[0]["id"])
+
+            #initialise quiz variables
+            session["ques"] = 0
+            session["user"] = {}
+            session["level"] = 0
+            session["num"] = 0
             return redirect("/")
         else:
             return apology("Invalid Username or Password", 403)
@@ -64,18 +71,20 @@ def register():
     if request.method == "GET":
         return render_template("register.html")
     else:
+        #sets username to local copy
         username = request.form.get("username")
+        #checks if any field is blank
         if not username or not request.form.get("password") or not request.form.get("confirmation"):
             return apology("Invalid Username or Password", 400)
         elif request.form.get("password") != request.form.get("confirmation"):
             return apology("Passwords do not match", 400)
-
+        #lowers the username so username case doesnt matter
         username = request.form.get("username").lower()
         raw = db.execute("SELECT username FROM users WHERE username = ?", username)
 
         if len(raw) > 0:
             return apology("Username already exists", 400)
-
+        #hashes password and adds into database
         db.execute("INSERT INTO users (username, hash) VALUES(?, ?)", username,
                    generate_password_hash(request.form.get("password")))
 
@@ -93,29 +102,38 @@ def logout():
     return redirect("/login")
 
 
-session["ques"] = 0
-session["user"] = {}
-session["level"] = 0
-session["num"] = 0
+#sets id to be acessible by all functions
 id = 0
 @app.route("/quiz", methods=['GET', 'POST'])
 @login_required
 def quiz():
     if request.method == "GET":
+        #configures to use global id instead of local copy
         global id
+        #session num initialised by num function - checks if function was skipped and sets default value of 10
+        if not session["num"]:
+            session["num"] == 10
+
         if session["ques"] <= session["num"]:
+            #level is set to 0 by deafault by login - level increases with correctly answered questions
+            #id != id ensures that questions are not repeated
             raw = db.execute("SELECT question, id, image FROM questions WHERE level = ? AND id != ?", session["level"] + 1, id)
             row = randint(0, (len(raw) - 1))
             question = raw[row]["question"]
             id = raw[row]["id"]
             image = raw[row]["image"]
+            #randomly decides wheteher the question is multiple choice
             if randint(0, 1) == 0:
+                #increments the number of questions asked
                 session["ques"] += 1
                 return render_template("quiz.html", question=question, image=image, id=id, button="n")
             else:
+                #id variable set to the id of the last question asked
                 raw = db.execute("SELECT answer, wrong FROM questions WHERE id = ?", id)
                 right = raw[0]["answer"].title()
+                #splits the 2 wrong answers in the database
                 wrong, wrong1 = str(raw[0]["wrong"]).split(", ")
+                #randomises the correct answer location
                 if randint(0, 2) == 0:
                     session["ques"] += 1
                     return render_template("button.html", question=question, image=image, id=id, answer1=right, answer2=wrong1.title(), answer3=wrong.title(), button="y")
@@ -126,9 +144,11 @@ def quiz():
                     session["ques"] += 1
                     return render_template("button.html", question=question, image=image, id=id, answer1=wrong1.title(), answer2=wrong.title(), answer3=right, button="y")
         else:
+            #executes when quiz is finished
             total = 0
             html = ''
             for key in session["user"].keys():
+                #inserts html directly into jinja template
                 if session["user"][key] == 'y':
                     raw = db.execute("SELECT question, level FROM questions WHERE id = ?", key)
                     html += '<h3>' + raw[0]['question'] + ' : <span class="green">Correct!</span></h3><br></br>'
@@ -145,7 +165,7 @@ def quiz():
                         session["level"] = session["level"]
                     else:
                         session["level"] = int(raw[0]["level"])
-
+                    #adds values to the database
                     db.execute("UPDATE users SET questions = questions + 1, level = ? WHERE id = ?", session["level"], session["user_id"])
 
             session["user"].clear()
@@ -153,6 +173,7 @@ def quiz():
             session["ques"] = 0
             return render_template("final.html", body=html, percent=int(round(((total)/(session["num"] + 1)) * 100)))
     else:
+        #executes on POST - checks if answer is correct and updates in a local dictionary stored in the users session
         id = request.form.get("id")
 
         if request.form.get("button") == "y":
@@ -228,6 +249,7 @@ def questions():
 @app.route("/add", methods=['GET', 'POST'])
 @login_required
 def add():
+    #allows users add questions - are added to different database so they can be reviewed - basic format checking performed
     if request.method == "GET":
         return render_template("add.html")
     else:
@@ -245,6 +267,7 @@ def add():
 @app.route("/approve", methods=['GET', 'POST'])
 @admin_required
 def approve():
+    #displays questions that need to be checked
     if request.method == "GET":
         questions = []
         raw = db.execute("SELECT id, question, level FROM review ORDER BY level ASC")
@@ -273,6 +296,7 @@ def approve():
 @app.route("/no", methods=['GET', 'POST'])
 @login_required
 def no():
+    #gets numbe of questions user wants to be asked
     if request.method == "GET":
         return render_template("no.html")
     else:

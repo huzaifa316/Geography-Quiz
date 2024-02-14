@@ -315,5 +315,3 @@ def no():
         if session["num"] < 1:
             session["num"] = 9
         return redirect("/quiz")
-
-app.run(host='0.0.0.0', port=5000)

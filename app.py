@@ -108,7 +108,7 @@ def quiz():
         global id
         #session num initialised by num function - checks if function was skipped and sets default value of 10
         if not session["num"]:
-            session["num"] == 10
+            session["num"] == 9
 
         if session["ques"] <= session["num"]:
             #level is set to 0 by deafault by login - level increases with correctly answered questions
